@@ -36,31 +36,33 @@ lastRun_2015D  = 258158
 # exit()
 
 myPayload = Payload(
-    getfiles('/afs/cern.ch/work/m/manzoni/public/eoyReReco_anyT/2015Dv3'      , 'BeamFit_LumiBased_NewAlignWorkflow_alcareco_') 
+    '/afs/cern.ch/work/f/fbrivio/beamSpot/CMSSW_8_0_4/src/RecoVertex/BeamSpotProducer/test/TkAlMinBias_Express_v1_ez3_dydz00002_Run272785.txt'
+    #getfiles('/afs/cern.ch/work/m/manzoni/public/eoyReReco_anyT/2015Dv3'      , 'BeamFit_LumiBased_NewAlignWorkflow_alcareco_') 
+    #getfiles('/afs/cern.ch/work/f/fbrivio/beamSpot/CMSSW_8_0_4/src/RecoVertex/BeamSpotProducer/test/TkAlMinBias_Express_v1_272785_Run272785.txt', ) 
 )
 
-# # Plot fit results from txt file
-# variables = [
-#   'X'         ,
-#   'Y'         ,
-#   'Z'         ,
-#   'sigmaZ'    ,
-#   'dxdz'      ,
-#   'dydz'      ,
-#   'beamWidthX',
-#   'beamWidthY'
-# ]
-# 
-# histos_pre_merging  = []
-# for var in variables:
-#     h1 = myPayload.plot(var,  0, 999999, savePdf = True, returnHisto = True, dilated = 6, byFill = False)
-#     histos_pre_merging.append(h1)
-# 
-# file_pre_merging.cd()
-# for h1 in histos_pre_merging:
-#     h1.Write()
+# Plot fit results from txt file
+variables = [
+   'X'         ,
+   'Y'         ,
+   'Z'         ,
+   'sigmaZ'    ,
+   'dxdz'      ,
+   'dydz'      ,
+   'beamWidthX',
+   'beamWidthY'
+]
+ 
+histos_pre_merging  = []
+for var in variables:
+    h1 = myPayload.plot(var,  0, 999999, savePdf = True, returnHisto = True, dilated = 6, byFill = False)
+    histos_pre_merging.append(h1)
+ 
+file_pre_merging.cd()
+for h1 in histos_pre_merging:
+    h1.Write()
 
-
+'''
 # convert results into a dictionary  { Run : {Lumi Range: BeamSpot Fit Object} }
 allBS            = myPayload.fromTextToBS() 
 for irun,ivalues in allBS.items():
@@ -120,5 +122,5 @@ for irun,ivalues in allBS.items():
 #     bs_list = [allBS[runNumber][i] for i in sorted(list(myrange))]
 #     aveBeamSpot = averageBeamSpot(bs_list)
 #     aveBeamSpot.Dump('bs_weighted_results_' + str(runNumber) + '_AllRun.txt', 'w+')
-
+'''
 

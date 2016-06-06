@@ -39,7 +39,7 @@ def fillHistos(tree    ,
   lumi_npv = {}
 
   for i, ev in enumerate(tree):
-    if i > 100000: break
+    #if i > 100000: break
     try:
       lumi_npv[ev.lumi]
     except:

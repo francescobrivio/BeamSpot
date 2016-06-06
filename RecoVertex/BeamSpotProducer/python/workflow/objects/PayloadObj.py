@@ -177,8 +177,9 @@ class Payload(object):
         
         # get the list of BS objects
         myBS = {k:v for k, v in self.fromTextToBS(iov = True).items()
-                if afterFirst(k) and beforeLast(k)}
+                if afterFirst(k) and beforeLast(k) and v.Type > 1.} # Francesco: ask only for the good LS (fit type == 2)
 
+        #import pdb; pdb.set_trace()
         runs = list(set(v.Run for v in myBS.values()))
         
         byrun = False
