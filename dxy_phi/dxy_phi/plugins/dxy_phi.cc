@@ -223,26 +223,36 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	
 		// Counter for vertex indices
 		VtxID_ += 1;
-		//std::cout<<"Vertex n: "<<VtxID_<<" - nTracks: "<<iPV.nTracks()<<std::endl;
+		std::cout<<"Vertex n: "<<VtxID_<<" - trackSize:   "<<iPV.tracksSize()<<std::endl;
+		std::cout<<"              - handleSize: "<<trkHandle->size()<<std::endl;
+		//std::cout<<"            -refittedtracks:"<<(iPV.refittedTracks()).size()<<std::endl;
 
+		int n_tracks = 0;
           	// Loop on Tracks
-          	//for (reco::Vertex::trackRef_iterator trki = iPV.tracks_begin(); trki != iPV.tracks_end(); ++trki) 
-          	//{
-          	for (unsigned tracksIt =0 ;  tracksIt < trkHandle->size(); tracksIt++)
+          	for (reco::Vertex::trackRef_iterator trki = iPV.tracks_begin(); trki != iPV.tracks_end(); ++trki) 
+          	//for (unsigned tracksIt =0 ;  tracksIt < trkHandle->size(); tracksIt++)
+          	//for (unsigned tracksIt =0 ;  tracksIt < iPV.tracksSize(); tracksIt++)
           	{
 	  	  	// Get the courrent track
-          	  	//reco::TrackRef trk_now(trkHandle, (*trki).key());
+          	  	reco::TrackRef trk_now(trkHandle, (*trki).key());
 			//std::cout<<"\t Traccia:"<<typeid(trk_now).name()<<std::endl;
-          	  	reco::Track iTrack = trkHandle->at(tracksIt);                                                	   
- 	
+			//std::cout<<"\t \t \t Traccia:"<<trk_now->pt()<<" - "<<trk_now->eta()<<std::endl;
+          	  	//reco::Track iTrack = trkHandle->at(tracksIt);                                            	   
+          	  	//reco::Track iTrack = iPV.refittedTracks().at(tracksIt);   // non trkHandle ma collez tr da vertice                                             	   
+
+			//std::cout<<"\t \t \t Traccia:"<<trk_now->pt()<<" - "<<trk_now->eta()<<" - "<<trk_now->normalizedChi2()<<std::endl;
+
 	  	  	// Get the informations
-			//if (trk_now->numberOfValidHits() > 6 ) // && && trk_now->normalizedChi2() < 10. && trk_now->normalizedChi2() > 0.)
-			if (iTrack.numberOfValidHits() > 6 && iTrack.chi2() <= 10.)
+			if (trk_now->numberOfValidHits()>6 && trk_now->pt()<50. && trk_now->pt()>0.001 && trk_now->normalizedChi2()<10. && 
+				trk_now->normalizedChi2()>0. && trk_now->quality(reco::TrackBase::highPurity)) // && trk_now->normalizedChi2() > 0.)
+			//if (iTrack.numberOfValidHits() > 6 && iTrack.normalizedChi2() <= 10.)
 			{
-			    	Run_		= iEvent.id().run();
+
+			//std::cout<<"\t \t \t Traccia:"<<trk_now->pt()<<" - "<<trk_now->eta()<<" - "<<trk_now->normalizedChi2()<<std::endl;
+			//std::cout<<"\t \t \t \t  - ACCEPTED"<<std::endl;
+			    	/*Run_		= iEvent.id().run();
 			    	Lumi_		= iEvent.id().luminosityBlock();
 			    	Event_		= iEvent.id().event();
-			
 				pt_		= iTrack.pt();
 				eta_		= iTrack.eta();
 				chi2_		= iTrack.normalizedChi2();
@@ -252,33 +262,37 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			    	Strip_HITs_	= iTrack.hitPattern().numberOfValidStripHits();
 			    	Track_HITs_	= iTrack.numberOfValidHits();
 			    	high_quality_	= iTrack.quality(reco::TrackBase::highPurity);
-		
 			    	x_PV_ 	 	= iTrack.vx();
 			    	y_PV_ 	 	= iTrack.vy();
-			    	z_PV_		= iTrack.vz();
+			    	z_PV_		= iTrack.vz();*/
 	
-				/*pt_ 	 	= trk_now->pt();
+
+				Run_		= iEvent.id().run();
+			    	Lumi_		= iEvent.id().luminosityBlock();
+			    	Event_		= iEvent.id().event();
+				pt_ 	 	= trk_now->pt();
 				eta_ 	 	= trk_now->eta();
-				phi_		= trk_now->phi();
 			    	chi2_ 	 	= trk_now->normalizedChi2();
-			    	ndof_ 	 	= trk_now->ndof();
+				phi_		= trk_now->phi();
 			    	IP_ 	 	= trk_now->dxy();
 			    	Pix_HITs_	= trk_now->hitPattern().numberOfValidPixelHits();
 			    	Strip_HITs_	= trk_now->hitPattern().numberOfValidStripHits();
 			    	Track_HITs_	= trk_now->numberOfValidHits();
-			    	//std::cout<<"\t \t hits: "<<Pix_HITs_<<" - "<<Strip_HITs_<<" - "<<Track_HITs_<<std::endl;
 			    	high_quality_	= trk_now->quality(reco::TrackBase::highPurity);
 			    	x_PV_ 	 	= trk_now->vx();
 			    	y_PV_ 	 	= trk_now->vy();
-			    	z_PV_		= trk_now->vz();*/
-		
+			    	z_PV_		= trk_now->vz();
+
+				//std::cout<<"\t Vertex number: "<< VtxID_ <<std::endl;
 			    	// Fill the TTree
-			    	trackTree_->Fill();
+			    	trackTree_->Fill(); 
+
+				n_tracks +=1;
 	
 			} //if track conditions
 	
 	  	} //loop on tracks
-	
+		std::cout<<"\t      - n_tracks: "<<n_tracks<<std::endl;
 	} //loop on vertex
 	std::cout<<"Total number of vtxs until now: "<<VtxID_<<std::endl;
 
@@ -310,8 +324,6 @@ void dxy_phi::beginEvent()
 	Track_HITs_ 	= 0;
 	high_quality_ 	= false;
 
-
-	//VtxID_	= 0;
 	x_PV_ 	= 0.;
 	y_PV_ 	= 0.;
 	z_PV_ 	= 0.;
