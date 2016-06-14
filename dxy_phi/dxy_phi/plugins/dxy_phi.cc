@@ -234,7 +234,7 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           	{
 	  	  	// Get the courrent track
           	  	reco::TrackRef trk_now(trkHandle, (*trki).key());
-;
+
           	  	//reco::Track iTrack = trkHandle->at(tracksIt);                                            	   
           	  	//reco::Track iTrack = iPV.refittedTracks().at(tracksIt);   // non trkHandle ma collez tr da vertice                                             	   
 

@@ -46,7 +46,7 @@ void dxy_fitter_2 ()
 
 	// Output file
 	//TFile* outfile = TFile::Open("TT_graphs.root","RECREATE");
-	TFile* outfile = TFile::Open("graphs_test.root","RECREATE");
+	TFile* outfile = TFile::Open("graphs.root","RECREATE");
   	std::cout << "\t Output file: " << outfile->GetName() << std::endl;
 
 	// TH2D histograms
@@ -59,12 +59,16 @@ void dxy_fitter_2 ()
 
 	// TProfiles
 	prof_plus = new TProfile("prof_plus","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}+#phi_{2})",40,-1.,1.,dxy_min,dxy_max);
+	prof_plus->GetXaxis()->SetTitle("cos(#phi_{1}+#phi_{2})");
+	prof_plus->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
 	prof_minus = new TProfile("prof_minus","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}-#phi_{2})",40,-1.,1.,dxy_min,dxy_max);
+	prof_minus->GetXaxis()->SetTitle("cos(#phi_{1}-#phi_{2})");
+	prof_minus->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
 
 	// Input file and tree
 	//TFile* inputfile = TFile::Open("/afs/cern.ch/work/f/fbrivio/beamSpot/CMSSW_8_0_4/src/dxy_phi/dxy_phi/test/tracksFile.root", "READ");
 	//TFile* inputfile = TFile::Open("TT_tracksFile.root", "READ");
-	TFile* inputfile = TFile::Open("test_fullCUT.root", "READ");
+	TFile* inputfile = TFile::Open("tracksFile.root", "READ");
   	std::cout << "\t Input file: " << inputfile -> GetName() << std::endl;
   	if (!inputfile) 
 	{
@@ -172,6 +176,7 @@ void dxy_fitter_2 ()
 	root[] Double_t e1 = fit->GetParError(0);*/
 
 	TF1 *fit_minus = prof_minus->GetFunction("pol1");
+	fit_minus->SetLineColor(kBlue);
 	double q_minus = fit_minus->GetParameter(0);
 	double m_minus = fit_minus->GetParameter(1);
 
