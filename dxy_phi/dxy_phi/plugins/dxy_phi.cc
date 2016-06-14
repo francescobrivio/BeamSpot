@@ -209,12 +209,13 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// Handles to get trk and PV collections
 	edm::Handle<reco::TrackCollection> trkHandle;
 	iEvent.getByToken(trackToken_, trkHandle);
+	//iEvent.getByLabel(trackTag_,trkHandle);
 	//iEvent.getByLabel(edm::InputTag("ALCARECOTkAlMinBias","","RECO"), trkHandle);
 
         edm::Handle<reco::VertexCollection> pvHandle;
 	iEvent.getByToken(offlinePVToken_, pvHandle);
+  	const reco::VertexCollection primvtx  = *(pvHandle.product());
   	//iEvent.getByLabel("offlinePrimaryVertices", pvHandle)       ;
-  	const reco::VertexCollection primvtx  = *(pvHandle.product())  ;
 
 	// Loop on PV (no need for iPV.isValid() ad all vtxs are valid)
 	for (reco::VertexCollection::const_iterator pvIt = primvtx.begin(); pvIt!=primvtx.end(); pvIt++)        
@@ -229,27 +230,18 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 		int n_tracks = 0;
           	// Loop on Tracks
-          	for (reco::Vertex::trackRef_iterator trki = iPV.tracks_begin(); trki != iPV.tracks_end(); ++trki) 
-          	//for (unsigned tracksIt =0 ;  tracksIt < trkHandle->size(); tracksIt++)
-          	//for (unsigned tracksIt =0 ;  tracksIt < iPV.tracksSize(); tracksIt++)
+          	for (reco::Vertex::trackRef_iterator trki = iPV.tracks_begin(); trki != iPV.tracks_end(); ++trki)  
           	{
 	  	  	// Get the courrent track
           	  	reco::TrackRef trk_now(trkHandle, (*trki).key());
-			//std::cout<<"\t Traccia:"<<typeid(trk_now).name()<<std::endl;
-			//std::cout<<"\t \t \t Traccia:"<<trk_now->pt()<<" - "<<trk_now->eta()<<std::endl;
+;
           	  	//reco::Track iTrack = trkHandle->at(tracksIt);                                            	   
           	  	//reco::Track iTrack = iPV.refittedTracks().at(tracksIt);   // non trkHandle ma collez tr da vertice                                             	   
 
-			//std::cout<<"\t \t \t Traccia:"<<trk_now->pt()<<" - "<<trk_now->eta()<<" - "<<trk_now->normalizedChi2()<<std::endl;
-
 	  	  	// Get the informations
-			if (trk_now->numberOfValidHits()>6 && trk_now->pt()<50. && trk_now->pt()>0.001 && trk_now->normalizedChi2()<10. && 
-				trk_now->normalizedChi2()>0. && trk_now->quality(reco::TrackBase::highPurity)) // && trk_now->normalizedChi2() > 0.)
-			//if (iTrack.numberOfValidHits() > 6 && iTrack.normalizedChi2() <= 10.)
+			if (trk_now->numberOfValidHits()>6 && trk_now->pt()>0.5 && trk_now->normalizedChi2()<10. 
+				&& trk_now->normalizedChi2()>0. && trk_now->quality(reco::TrackBase::highPurity))
 			{
-
-			//std::cout<<"\t \t \t Traccia:"<<trk_now->pt()<<" - "<<trk_now->eta()<<" - "<<trk_now->normalizedChi2()<<std::endl;
-			//std::cout<<"\t \t \t \t  - ACCEPTED"<<std::endl;
 			    	/*Run_		= iEvent.id().run();
 			    	Lumi_		= iEvent.id().luminosityBlock();
 			    	Event_		= iEvent.id().event();
@@ -264,8 +256,7 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			    	high_quality_	= iTrack.quality(reco::TrackBase::highPurity);
 			    	x_PV_ 	 	= iTrack.vx();
 			    	y_PV_ 	 	= iTrack.vy();
-			    	z_PV_		= iTrack.vz();*/
-	
+			    	z_PV_		= iTrack.vz();*/	
 
 				Run_		= iEvent.id().run();
 			    	Lumi_		= iEvent.id().luminosityBlock();
@@ -283,7 +274,6 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			    	y_PV_ 	 	= trk_now->vy();
 			    	z_PV_		= trk_now->vz();
 
-				//std::cout<<"\t Vertex number: "<< VtxID_ <<std::endl;
 			    	// Fill the TTree
 			    	trackTree_->Fill(); 
 
@@ -318,6 +308,7 @@ void dxy_phi::beginEvent()
 	pt_ 		= 0.;
 	eta_ 		= 0.;
 	chi2_ 		= 0.;
+	phi_		= 0.;
 	IP_ 		= 0.;
 	Pix_HITs_ 	= 0;
 	Strip_HITs_	= 0;
