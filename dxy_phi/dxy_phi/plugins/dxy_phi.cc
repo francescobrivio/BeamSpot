@@ -86,6 +86,7 @@ class dxy_phi : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 	int Run_;
 	int Lumi_;
 	int Event_;
+	int Collision_ = 0;
 
 	double pt_;
 	double eta_;
@@ -93,6 +94,9 @@ class dxy_phi : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 	double chi2_;
 	//double ndof_;
 	double IP_;
+	double d0_;
+	double d0_bs_;
+	double d0_xyz_;
 	int Pix_HITs_; 
 	int Strip_HITs_;
 	int Track_HITs_;
@@ -103,12 +107,17 @@ class dxy_phi : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 	double y_PV_;
 	double z_PV_;
 
+	reco::BeamSpot beamSpot;
+
 	// Input Tags and Tokens
 	edm::InputTag offlinePVTag_;
 	edm::EDGetTokenT<reco::VertexCollection> offlinePVToken_;
 
 	edm::InputTag trackTag_;
 	edm::EDGetTokenT<reco::TrackCollection> trackToken_;
+
+	edm::InputTag beamSpotTag_;
+	edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
 
 };
 
@@ -126,11 +135,12 @@ class dxy_phi : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 dxy_phi::dxy_phi(const edm::ParameterSet& iConfig):
 	offlinePVTag_		(iConfig.getParameter<edm::InputTag>("offlineVtx")),
 	offlinePVToken_         (consumes<reco::VertexCollection>(offlinePVTag_)),
-	//offlinePVToken_         ("offlinePrimaryVertices");
 
 	trackTag_		(iConfig.getParameter<edm::InputTag>("tracks")),
-	trackToken_		(consumes<reco::TrackCollection>(trackTag_))
-	//trackToken_		("ALCARECOTkAlMinBias");
+	trackToken_		(consumes<reco::TrackCollection>(trackTag_)),
+
+	beamSpotTag_		(iConfig.getParameter<edm::InputTag>("beamSpot")),
+	beamSpotToken_		(consumes<reco::BeamSpot>(beamSpotTag_))
 {
    	//now do what ever initialization is needed
    	usesResource("TFileService");
@@ -163,6 +173,7 @@ dxy_phi::beginJob()
 	trackTree_->Branch("Run"       		,&Run_		);
 	trackTree_->Branch("Lumi"	   	,&Lumi_		);
 	trackTree_->Branch("Event"	   	,&Event_	);
+	trackTree_->Branch("Collision"		,&Collision_	);
 
 	trackTree_->Branch("pt"	   		,&pt_		);
 	trackTree_->Branch("eta"	   	,&eta_		);
@@ -170,6 +181,9 @@ dxy_phi::beginJob()
 	trackTree_->Branch("chi2"	   	,&chi2_		);
 	//trackTree_->Branch("ndof"	   	,&ndof_		);
 	trackTree_->Branch("dxy"       		,&IP_		);
+	trackTree_->Branch("d0"			,&d0_		);
+	trackTree_->Branch("d0_bs"		,&d0_bs_	);
+	trackTree_->Branch("d0_xyz"		,&d0_xyz_	);
 	trackTree_->Branch("Pix_HITs"		,&Pix_HITs_	);
 	trackTree_->Branch("Strip_HITs"		,&Pix_HITs_	);
 	trackTree_->Branch("Track_HITs"		,&Track_HITs_	);
@@ -202,6 +216,7 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 	//using namespace edm;
 	std::cout<<"\t   ~~~ NEW EVENT ~~~"<<std::endl;
+	Collision_ += 1;
 
 	// Clear all the variables
 	beginEvent();
@@ -217,6 +232,9 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   	const reco::VertexCollection primvtx  = *(pvHandle.product());
   	//iEvent.getByLabel("offlinePrimaryVertices", pvHandle)       ;
 
+	edm::Handle<reco::BeamSpot> beamSpotHandle;
+	iEvent.getByToken(beamSpotToken_, beamSpotHandle);
+
 	// Loop on PV (no need for iPV.isValid() ad all vtxs are valid)
 	for (reco::VertexCollection::const_iterator pvIt = primvtx.begin(); pvIt!=primvtx.end(); pvIt++)        
         {
@@ -225,8 +243,11 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		// Counter for vertex indices
 		VtxID_ += 1;
 		std::cout<<"Vertex n: "<<VtxID_<<" - trackSize:   "<<iPV.tracksSize()<<std::endl;
-		std::cout<<"              - handleSize: "<<trkHandle->size()<<std::endl;
-		//std::cout<<"            -refittedtracks:"<<(iPV.refittedTracks()).size()<<std::endl;
+
+		// Set the coordinates of the current vertex
+	    	x_PV_ 	 	= iPV.x();
+	    	y_PV_ 	 	= iPV.y();
+	    	z_PV_		= iPV.z();
 
 		int n_tracks = 0;
           	// Loop on Tracks
@@ -266,13 +287,25 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			    	chi2_ 	 	= trk_now->normalizedChi2();
 				phi_		= trk_now->phi();
 			    	IP_ 	 	= trk_now->dxy();
+				//d0_		= trk_now->d0();
 			    	Pix_HITs_	= trk_now->hitPattern().numberOfValidPixelHits();
 			    	Strip_HITs_	= trk_now->hitPattern().numberOfValidStripHits();
 			    	Track_HITs_	= trk_now->numberOfValidHits();
 			    	high_quality_	= trk_now->quality(reco::TrackBase::highPurity);
-			    	x_PV_ 	 	= trk_now->vx();
-			    	y_PV_ 	 	= trk_now->vy();
-			    	z_PV_		= trk_now->vz();
+			    	//x_PV_ 	 	= trk_now->vx();
+			    	//y_PV_ 	 	= trk_now->vy();
+			    	//z_PV_		= trk_now->vz();
+
+				// Impact parameters
+				beamSpot = *beamSpotHandle;
+				math::XYZPoint BSpoint(beamSpot.x0(),beamSpot.y0(), beamSpot.z0());
+				d0_bs_ = -1.* trk_now->dxy(BSpoint);
+
+				math::XYZPoint zero_point(0.,0.,0.);
+				d0_ = -1.* trk_now->dxy(zero_point);
+				
+				math::XYZPoint PV_point(x_PV_, y_PV_, z_PV_);
+				d0_xyz_ = -1.* trk_now->dxy(PV_point);
 
 			    	// Fill the TTree
 			    	trackTree_->Fill(); 
@@ -285,6 +318,7 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		std::cout<<"\t      - n_tracks: "<<n_tracks<<std::endl;
 	} //loop on vertex
 	std::cout<<"Total number of vtxs until now: "<<VtxID_<<std::endl;
+	std::cout<<"Event number:                   "<<Collision_<<std::endl;
 
 #ifdef THIS_IS_AN_EVENT_EXAMPLE
    Handle<ExampleData> pIn;
@@ -310,6 +344,9 @@ void dxy_phi::beginEvent()
 	chi2_ 		= 0.;
 	phi_		= 0.;
 	IP_ 		= 0.;
+	d0_		= 0.;
+	d0_bs_		= 0.;
+	d0_xyz_		= 0.;
 	Pix_HITs_ 	= 0;
 	Strip_HITs_	= 0;
 	Track_HITs_ 	= 0;

@@ -39,42 +39,79 @@ int dxy_bins = 2000;
 double dxy_min = -0.03;
 double dxy_max = 0.03;
 
+int cos_bins = 40;
+
 void dxy_fitter_2 ()
 {
 
 	std::cout<<"------------ BEGIN OF MACRO ------------"<<std::endl;
 
-	// Output file
-	//TFile* outfile = TFile::Open("TT_graphs.root","RECREATE");
-	TFile* outfile = TFile::Open("graphs.root","RECREATE");
-  	std::cout << "\t Output file: " << outfile->GetName() << std::endl;
-
-	// TH2D histograms
-	h_cos_plus = new TH2D("cos_plus","TH2D of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}+#phi_{2})",40,-1.,1.,dxy_bins,dxy_min,dxy_max);
-	h_cos_plus->GetXaxis()->SetTitle("cos(#phi_{1}+#phi_{2})");
-	h_cos_plus->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
-	h_cos_minus = new TH2D("cos_minus","TH2D of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}-#phi_{2})",40,-1.,1.,dxy_bins,dxy_min,dxy_max);
-	h_cos_minus->GetXaxis()->SetTitle("cos(#phi_{1}-#phi_{2})");
-	h_cos_minus->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
-
-	// TProfiles
-	prof_plus = new TProfile("prof_plus","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}+#phi_{2})",40,-1.,1.,dxy_min,dxy_max);
-	prof_plus->GetXaxis()->SetTitle("cos(#phi_{1}+#phi_{2})");
-	prof_plus->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
-	prof_minus = new TProfile("prof_minus","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}-#phi_{2})",40,-1.,1.,dxy_min,dxy_max);
-	prof_minus->GetXaxis()->SetTitle("cos(#phi_{1}-#phi_{2})");
-	prof_minus->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
-
-	// Input file and tree
+	// INPUT file and tree
 	//TFile* inputfile = TFile::Open("/afs/cern.ch/work/f/fbrivio/beamSpot/CMSSW_8_0_4/src/dxy_phi/dxy_phi/test/tracksFile.root", "READ");
 	//TFile* inputfile = TFile::Open("TT_tracksFile.root", "READ");
-	TFile* inputfile = TFile::Open("tracksFile.root", "READ");
+	//TFile* inputfile = TFile::Open("bs_tracksFile.root", "READ");
+	//TFile* inputfile = TFile::Open("d0_tracksFile.root", "READ");
+	TFile* inputfile = TFile::Open("IPs_tracksFile2.root", "READ");
+	//TFile* inputfile = TFile::Open("event_tracksFile.root", "READ");
+	//TFile* inputfile = TFile::Open("test.root", "READ");
   	std::cout << "\t Input file: " << inputfile -> GetName() << std::endl;
   	if (!inputfile) 
 	{
     	std::cout << " *** file not found *** " << std::endl;
     	return;
   	}
+
+	// OUTPUT file
+	//TFile* outfile = TFile::Open("TT_graphs.root","RECREATE");
+	//TFile* outfile = TFile::Open("bs_graphs.root","RECREATE");
+	//TFile* outfile = TFile::Open("d0_graphs.root","RECREATE");
+	TFile* outfile = TFile::Open("IPs_graphs3.root","RECREATE");
+	//TFile* outfile = TFile::Open("event_graphs.root","RECREATE");
+	//TFile* outfile = TFile::Open("test_graphs.root","RECREATE");
+  	std::cout << "\t Output file: " << outfile->GetName() << std::endl;
+
+	// TH2D histograms
+	h_cos_plus = new TH2D("cos_plus","TH2D of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}+#phi_{2})",cos_bins,-1.,1.,dxy_bins,dxy_min,dxy_max);
+	h_cos_plus->GetXaxis()->SetTitle("cos(#phi_{1}+#phi_{2})");
+	h_cos_plus->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
+	h_cos_minus = new TH2D("cos_minus","TH2D of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}-#phi_{2})",cos_bins,-1.,1.,dxy_bins,dxy_min,dxy_max);
+	h_cos_minus->GetXaxis()->SetTitle("cos(#phi_{1}-#phi_{2})");
+	h_cos_minus->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
+
+	// TH1D per IP
+	h_dxy 	= new 	TH1D("h_dxy", 	"h_dxy", 100, -0.2, 0.2);
+	h_d0 	= new 	TH1D("h_d0", 	"h_d0", 100, -0.2, 0.2);
+	h_bs = new 	TH1D("h_bs", "h_d0_bs", 100, -0.2, 0.2);
+	h_xyz = new 	TH1D("h_xyz","h_d0_xyz", 100, -0.2, 0.2);
+
+	// TProfiles
+	prof_plus_dxy = new TProfile("prof_plus_dxy","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}+#phi_{2})",cos_bins,-1.,1.,dxy_min,dxy_max);
+	prof_plus_dxy->GetXaxis()->SetTitle("cos(#phi_{1}+#phi_{2})");
+	prof_plus_dxy->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
+	prof_minus_dxy = new TProfile("prof_minus_dxy","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}-#phi_{2})",cos_bins,-1.,1.,dxy_min,dxy_max);
+	prof_minus_dxy->GetXaxis()->SetTitle("cos(#phi_{1}-#phi_{2})");
+	prof_minus_dxy->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
+
+	prof_plus_d0 = new TProfile("prof_plus_d0","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}+#phi_{2})",cos_bins,-1.,1.,dxy_min,dxy_max);
+	prof_plus_d0->GetXaxis()->SetTitle("cos(#phi_{1}+#phi_{2})");
+	prof_plus_d0->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
+	prof_minus_d0 = new TProfile("prof_minus_d0","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}-#phi_{2})",cos_bins,-1.,1.,dxy_min,dxy_max);
+	prof_minus_d0->GetXaxis()->SetTitle("cos(#phi_{1}-#phi_{2})");
+	prof_minus_d0->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
+
+	prof_plus_bs = new TProfile("prof_plus_bs","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}+#phi_{2})",cos_bins,-1.,1.,dxy_min,dxy_max);
+	prof_plus_bs->GetXaxis()->SetTitle("cos(#phi_{1}+#phi_{2})");
+	prof_plus_bs->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
+	prof_minus_bs = new TProfile("prof_minus_bs","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}-#phi_{2})",cos_bins,-1.,1.,dxy_min,dxy_max);
+	prof_minus_bs->GetXaxis()->SetTitle("cos(#phi_{1}-#phi_{2})");
+	prof_minus_bs->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
+
+	prof_plus_xyz = new TProfile("prof_plus_xyz","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}+#phi_{2})",cos_bins,-1.,1.,dxy_min,dxy_max);
+	prof_plus_xyz->GetXaxis()->SetTitle("cos(#phi_{1}+#phi_{2})");
+	prof_plus_xyz->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
+	prof_minus_xyz = new TProfile("prof_minus_xyz","Profile of <dxy_{1}*dxy_{2}> versus cos(#phi_{1}-#phi_{2})",cos_bins,-1.,1.,dxy_min,dxy_max);
+	prof_minus_xyz->GetXaxis()->SetTitle("cos(#phi_{1}-#phi_{2})");
+	prof_minus_xyz->GetYaxis()->SetTitle("<dxy_{1}*dxy_{2}>");
 
 	// Check number of entries in ttree and the number of vertexes
 	TTree *tree = (TTree*) inputfile->Get("demo/trackTree_");
@@ -84,8 +121,8 @@ void dxy_fitter_2 ()
 	std::cout << "\t Number of vertexes = " << nvtxs << std::endl;
 
 	// Declaration of variables
-	double ipt, ieta, iphi, idxy, ichi2;
-	int iPix_HITs, iTrack_HITs, iVtxID;
+	double ipt, ieta, iphi, idxy, ichi2, id0, id0_bs, id0_xyz;
+	int iPix_HITs, iTrack_HITs, iVtxID, iCollision;
 	bool iQuality;
 
 	// Access branches of ttree
@@ -98,7 +135,12 @@ void dxy_fitter_2 ()
 
 	tree->SetBranchAddress("phi",&iphi);
 	tree->SetBranchAddress("dxy",&idxy);
+	tree->SetBranchAddress("d0",&id0);
+	tree->SetBranchAddress("d0_bs",&id0_bs);
+	tree->SetBranchAddress("d0_xyz",&id0_xyz);
 	tree->SetBranchAddress("VtxID",&iVtxID);
+	tree->SetBranchAddress("Collision",&iCollision);
+	tree->SetBranchAddress("Event",&iCollision);
 
 	// Loop on tracks
 	std::cout<<" - Begin of loop - "<<std::endl;
@@ -113,96 +155,152 @@ void dxy_fitter_2 ()
 		// Track selection (pt>1 - |eta|<1 - 8Hits - 1PixHit)
 		if( (ipt < pt_cut) || (std::abs(ieta) > eta_cut) || (iTrack_HITs < trk_hits_cut) || (iPix_HITs < pix_hits_cut) ) continue;
 			//|| (iQuality != 1) || (ichi2 > 10.) || (ichi2 < 0.) ) continue;
-		//if (ipt>= 1. && std::abs(ieta) <= 1. && iTrack_HITs >= 8 && iPix_HITs >= 1)
-		//{
+
 		after_cuts += 1;
 
 		//std::cout<<"First track: "<<i<<" - Vertex: "<<iVtxID<<std::endl;
 
 		// Temporary variables
 		int 	tmp_vtx = iVtxID;
+		int	tmp_coll = iCollision;
 		double 	tmp_phi = iphi;
 		double 	tmp_dxy = idxy;
+		double 	tmp_d0 = id0;
+		double	tmp_d0_bs = id0_bs;
+		double	tmp_d0_xyz = id0_xyz;
+
+		//std::cout<<"\t tmp_dxy= "<<tmp_dxy<<std::endl;
+		h_dxy->Fill(idxy);
+		h_d0->Fill(id0);
+		h_bs->Fill(id0_bs);
+		h_xyz->Fill(id0_xyz);
 
 		// Another loop on tracks
 		for (int j = i+1; j< nentries; ++j)
 		{
 			tree->GetEntry(j);
-			//std::cout<<"\tSecond track: "<<j<<" - Vertex: "<<iVtxID<<" - tmpvtx: "<<tmp_vtx<<std::endl;
+
+			// Print the number of event
 			if (j % 1000 == 0) std::cout<<"Analysing event: "<<j<<std::endl;
 
 			// Check if the track is from same vertex
 			if (iVtxID > tmp_vtx) break;
-			//{std::cout<<"\t \t \t BREAKING"<<std::endl; break;}
+			//if (iCollision > tmp_coll) break;
 
 			// Track + vertex selection
 			if ( (iVtxID != tmp_vtx) || (ipt < pt_cut) || (std::abs(ieta)> eta_cut) || (iTrack_HITs < trk_hits_cut) || (iPix_HITs < pix_hits_cut) ) continue; 
-				//|| (iQuality != 1) || (ichi2 > 10.) || (ichi2 < 0.) ) continue;
-			
-			//std::cout<<"\t \t \t ACCEPTED"<<std::endl;
+			//if ( (iCollision != tmp_coll) || (ipt < pt_cut) || (std::abs(ieta)> eta_cut) || (iTrack_HITs < trk_hits_cut) || (iPix_HITs < pix_hits_cut) ) continue; 
 
+			// Fill TH2D
 			h_cos_plus ->Fill(std::cos(iphi + tmp_phi), idxy*tmp_dxy );
 			h_cos_minus->Fill(std::cos(iphi - tmp_phi), idxy*tmp_dxy );
 
-			prof_plus ->Fill(std::cos(iphi + tmp_phi), idxy*tmp_dxy );
-			prof_minus->Fill(std::cos(iphi - tmp_phi), idxy*tmp_dxy );
+			// Fill TProfiles
+			prof_plus_dxy 	->Fill(std::cos(iphi + tmp_phi), idxy*tmp_dxy 		);
+			prof_minus_dxy	->Fill(std::cos(iphi - tmp_phi), idxy*tmp_dxy 		);
+			prof_plus_d0 	->Fill(std::cos(iphi + tmp_phi), id0*tmp_d0 		);
+			prof_minus_d0	->Fill(std::cos(iphi - tmp_phi), id0*tmp_d0 		);
+			prof_plus_bs 	->Fill(std::cos(iphi + tmp_phi), id0_bs*tmp_d0_bs 	);
+			prof_minus_bs	->Fill(std::cos(iphi - tmp_phi), id0_bs*tmp_d0_bs 	);
+			prof_plus_xyz 	->Fill(std::cos(iphi + tmp_phi), id0_xyz*tmp_d0_xyz 	);
+			prof_minus_xyz	->Fill(std::cos(iphi - tmp_phi), id0_xyz*tmp_d0_xyz 	);
 		}
-		tmp_vtx = 0;
-		tmp_phi = 0.;
-		tmp_dxy = 0.;
-
-		//}
+	
+		// Clear temporary variables
+		tmp_vtx    = 0;
+		tmp_coll   = 0;
+		tmp_phi    = 0.;
+		tmp_dxy    = 0.;
+		tmp_d0	   = 0.;
+		tmp_d0_bs  = 0.;
+		tmp_d0_xyz = 0.;
 		
 	}
 
+	std::cout<<" - End of loop - "<<std::endl;
 	std::cout<<"\t Number of events after cuts = "<<after_cuts<<std::endl;
-
-	// TProfile from the TH2Ds
-	std::cout<<"Profiling...\n";
-	TProfile *prof_cos_minus = h_cos_minus->ProfileX();
-	TProfile *prof_cos_plus  = h_cos_plus ->ProfileX();
 
 	// Fit the TProfiles
 	std::cout<<"Fitting...\n";
-   	prof_minus->Fit("pol1");
-   	prof_plus ->Fit("pol1");
+   	prof_minus_dxy->Fit("pol1");
+   	prof_plus_dxy ->Fit("pol1");
+   	prof_minus_d0->Fit("pol1");
+   	prof_plus_d0 ->Fit("pol1");
+   	prof_minus_bs->Fit("pol1");
+   	prof_plus_bs ->Fit("pol1");
+   	prof_minus_xyz->Fit("pol1");
+   	prof_plus_xyz ->Fit("pol1");
 
 	// Retrieve fit parameters
-	/*root[] TF1 *fit = hist->GetFunction(function_name);
-	root[] Double_t chi2 = fit->GetChisquare();
-	// value of the first parameter
-	root[] Double_t p1 = fit->GetParameter(0);
-	// error of the first parameter
-	root[] Double_t e1 = fit->GetParError(0);*/
+	std::cout<<"Retrieving parameters...\n";
+	TF1 *f_m_dxy = prof_minus_dxy->GetFunction("pol1");
+	TF1 *f_p_dxy = prof_plus_dxy->GetFunction("pol1");
+	double m_dxy = f_m_dxy->GetParameter(1);
+	double p_dxy = f_p_dxy->GetParameter(1);
 
-	TF1 *fit_minus = prof_minus->GetFunction("pol1");
-	fit_minus->SetLineColor(kBlue);
-	double q_minus = fit_minus->GetParameter(0);
-	double m_minus = fit_minus->GetParameter(1);
+	TF1 *f_m_d0 = prof_minus_d0->GetFunction("pol1");
+	TF1 *f_p_d0 = prof_plus_d0->GetFunction("pol1");
+	double m_d0 = f_m_d0->GetParameter(1);
+	double p_d0 = f_p_d0->GetParameter(1);
 
-	TF1 *fit_plus = prof_plus->GetFunction("pol1");
-	double q_plus = fit_plus->GetParameter(0);
-	double m_plus = fit_plus->GetParameter(1);
+	TF1 *f_m_bs = prof_minus_bs->GetFunction("pol1");
+	TF1 *f_p_bs = prof_plus_bs->GetFunction("pol1");
+	double m_bs = f_m_bs->GetParameter(1);
+	double p_bs = f_p_bs->GetParameter(1);
+
+	TF1 *f_m_xyz = prof_minus_xyz->GetFunction("pol1");
+	TF1 *f_p_xyz = prof_plus_xyz->GetFunction("pol1");
+	double m_xyz = f_m_xyz->GetParameter(1);
+	double p_xyz = f_p_xyz->GetParameter(1);
 
 	std::cout<<"\n*************** - FIT RESULTS - ***************"<<std::endl;
-	std::cout<<"Cos minus fit: y = "<<m_minus<<" x + "<<q_minus<<std::endl;
-	std::cout<<"Cos plus fit:  y = "<<m_plus<<" x + "<<q_plus<<std::endl;
+	std::cout<<"	- dxy - "<<std::endl;
+	std::cout<<"Sigma_x^2 = "<<m_dxy + p_dxy<<std::endl;
+	std::cout<<"Sigma_y^2 = "<<m_dxy - p_dxy<<std::endl;
+	std::cout<<"Sigma_x = "<<sqrt(m_dxy + p_dxy) * 10000<<" um"<<std::endl;
+	std::cout<<"Sigma_y = "<<sqrt(m_dxy - p_dxy) * 10000<<" um"<<std::endl;
 	std::cout<<"\n";
-	std::cout<<"Sigma_x^2 = "<<m_minus + m_plus<<std::endl;
-	std::cout<<"Sigma_y^2 = "<<m_minus - m_plus<<std::endl;
+	std::cout<<"	- d0 - "<<std::endl;
+	std::cout<<"Sigma_x^2 = "<<m_d0 + p_d0<<std::endl;
+	std::cout<<"Sigma_y^2 = "<<m_d0 - p_d0<<std::endl;
+	std::cout<<"Sigma_x = "<<sqrt(m_d0 + p_d0) * 10000<<" um"<<std::endl;
+	std::cout<<"Sigma_y = "<<sqrt(m_d0 - p_d0) * 10000<<" um"<<std::endl;
 	std::cout<<"\n";
-	std::cout<<"Sigma_x = "<<sqrt(m_minus + m_plus)<<std::endl;
-	std::cout<<"Sigma_y = "<<sqrt(m_minus - m_plus)<<std::endl;
+	std::cout<<"	- bs - "<<std::endl;
+	std::cout<<"Sigma_x^2 = "<<m_bs + p_bs<<std::endl;
+	std::cout<<"Sigma_y^2 = "<<m_bs - p_bs<<std::endl;
+	std::cout<<"Sigma_x = "<<sqrt(m_bs + p_bs) * 10000<<" um"<<std::endl;
+	std::cout<<"Sigma_y = "<<sqrt(m_bs - p_bs) * 10000<<" um"<<std::endl;
+	std::cout<<"\n";
+	std::cout<<"	- xyz - "<<std::endl;
+	std::cout<<"m_xyz = "<<m_xyz<<std::endl;
+	std::cout<<"p_xyz = "<<p_xyz<<std::endl;
+	std::cout<<"Sigma_x^2 = "<<m_xyz + p_xyz<<std::endl;
+	std::cout<<"Sigma_y^2 = "<<m_xyz - p_xyz<<std::endl;
+	std::cout<<"Sigma_x = "<<sqrt(m_xyz + p_xyz) * 10000<<" um"<<std::endl;
+	std::cout<<"Sigma_y = "<<sqrt(m_xyz - p_xyz) * 10000<<" um"<<std::endl;
 	std::cout<<"*************************************************"<<std::endl;
 
 	// Close file and save the results
 	outfile		-> cd();
+
   	h_cos_plus	-> Write();
   	h_cos_minus	-> Write();
-	prof_cos_plus	-> Write();
-	prof_cos_minus	-> Write();
-	prof_plus	-> Write();
-	prof_minus	-> Write();
+
+	h_dxy		-> Write();
+	h_d0		-> Write();
+	h_bs		-> Write();
+	h_xyz		-> Write();
+
+	prof_plus_dxy	-> Write();
+	prof_minus_dxy	-> Write();
+	prof_plus_d0	-> Write();
+	prof_minus_d0	-> Write();
+	prof_plus_bs	-> Write();
+	prof_minus_bs	-> Write();
+	prof_plus_xyz	-> Write();
+	prof_minus_xyz	-> Write();
+
   	outfile		-> Close();  
   
 	std::cout<<"------------ END OF MACRO ------------"<<std::endl;
