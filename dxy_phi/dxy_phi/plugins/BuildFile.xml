@@ -6,4 +6,6 @@
 <use name="DataFormats/ParticleFlowReco">
 <use name="PhysicsTools/UtilAlgos"/>
 <use name="FWCore/ServiceRegistry"/>
+<use name="TrackingTools/TransientTrack"/>
+<use name="TrackingTools/Records"/>
 <flags EDM_PLUGIN="1"/>
