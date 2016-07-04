@@ -232,7 +232,7 @@ void
 dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 	//using namespace edm;
-	std::cout<<"\t   ~~~ NEW EVENT ~~~"<<std::endl;
+	//std::cout<<"\t   ~~~ NEW EVENT ~~~"<<std::endl;
 	Collision_ += 1;
 
 	// Clear all the variables
@@ -264,7 +264,7 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	
 		// Counter for vertex indices
 		VtxID_ += 1;
-		std::cout<<"Vertex n: "<<VtxID_<<" - trackSize:   "<<iPV.tracksSize()<<std::endl;
+		//std::cout<<"Vertex n: "<<VtxID_<<" - trackSize:   "<<iPV.tracksSize()<<std::endl;
 
 		// Set the coordinates of the current vertex
 	    	x_PV_ 	 	= iPV.x();
@@ -282,8 +282,11 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           	  	//reco::Track iTrack = iPV.refittedTracks().at(tracksIt);   // non trkHandle ma collez tr da vertice                                             	   
 
 	  	  	// Get the informations
-			if (trk_now->numberOfValidHits()>6 && trk_now->pt()>0.5 && trk_now->normalizedChi2()<10. 
-				&& trk_now->normalizedChi2()>0. && trk_now->quality(reco::TrackBase::highPurity))
+			//if (trk_now->numberOfValidHits()>6 && trk_now->pt()>0.5 && trk_now->normalizedChi2()<10. 
+			//	&& trk_now->normalizedChi2()>0. && trk_now->quality(reco::TrackBase::highPurity))
+			if (trk_now->numberOfValidHits()>=8 && trk_now->pt()>=1. && trk_now->normalizedChi2()<10. 
+				&& trk_now->normalizedChi2()>0. && trk_now->quality(reco::TrackBase::highPurity) && (std::abs(trk_now->eta()) < 1.)
+				&& trk_now->hitPattern().numberOfValidPixelHits() >=1 )
 			{
 			    	/*Run_		= iEvent.id().run();
 			    	Lumi_		= iEvent.id().luminosityBlock();
@@ -343,10 +346,10 @@ dxy_phi::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			} //if track conditions
 	
 	  	} //loop on tracks
-		std::cout<<"\t  \t   - n_tracks: "<<n_tracks<<std::endl;
+		//std::cout<<"\t  \t   - n_tracks: "<<n_tracks<<std::endl;
 	} //loop on vertex
-	std::cout<<"Total number of vtxs until now: "<<VtxID_<<std::endl;
-	std::cout<<"Event number:                   "<<Collision_<<std::endl;
+	//std::cout<<"Total number of vtxs until now: "<<VtxID_<<std::endl;
+	//std::cout<<"Event number:                   "<<Collision_<<std::endl;
 
 #ifdef THIS_IS_AN_EVENT_EXAMPLE
    Handle<ExampleData> pIn;
